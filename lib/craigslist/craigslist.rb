@@ -75,15 +75,15 @@ module Craigslist
         Craigslist::PERSISTENT.city && Craigslist::PERSISTENT.category
 
       uri = self.build_uri(Craigslist::PERSISTENT.city, Craigslist::PERSISTENT.category)
-      search_results = []
+      posts = []
 
       for i in 0..(max_results / 100)
         uri = self.more_results(uri, i) if i > 0
         doc = Nokogiri::HTML(open(uri))
-        scrape_results(search_results, max_results, doc)
+        scrape_results(posts, max_results, doc)
       end
 
-      search_results
+      posts
     end
   end
 
@@ -96,41 +96,46 @@ module Craigslist
     uri + "index#{result_count.to_i * 100}.html"
   end
 
-  def self.scrape_results(search_results, max_results, doc)
+  def self.scrape_results(posts, max_results, doc)
     doc.xpath("//p[@class = 'row']").each do |node|
-      search_result = {}
-
+      post = {}
       inner = Nokogiri::HTML(node.to_s)
+
       inner.xpath("//a").each_with_index do |inner_node, index|
         if index.even?
-          search_result['text'] = inner_node.text.strip
-          search_result['href'] = inner_node['href']
+          post['text'] = inner_node.text.strip
+          post['href'] = inner_node['href']
         end
       end
 
       inner.xpath("//span[@class = 'itempp']").each do |inner_node|
-        search_result['price'] = inner_node.text.strip
+        post['price'] = inner_node.text.strip
       end
 
       inner.xpath("//span[@class = 'itempn']/font").each do |inner_node|
-        search_result['location'] = inner_node.text.strip[1..(inner_node.text.strip.length - 2)].strip
+        post['location'] = inner_node.text.strip[1..(inner_node.text.strip.length - 2)].strip
       end
 
       if Craigslist::PERSISTENT.images
-        inner.xpath("//span[@class = 'itempx']/span[@class = 'p']").each do |inner_node|
-          if inner_node.text.include?('img') || inner_node.text.include?('pic')
-            search_result['has_image'] = true
-            search_result['images'] = []
-            doc_post = Nokogiri::HTML(open(search_result['href']))
-            doc_post.css('div#thumbs a').each do |img|
-              search_result['images'] << img['href']
-            end
-          end
-        end
+        scrape_images(post, inner)
       end
 
-      search_results << search_result
-      break if search_results.length == max_results
+      posts << post
+      break if posts.length == max_results
     end
   end
+
+  def self.scrape_images(post, inner)
+    inner.xpath("//span[@class = 'itempx']/span[@class = 'p']").each do |inner_node|
+      if inner_node.text.include?('img') || inner_node.text.include?('pic')
+        post['has_image'] = true
+        post['images'] = []
+        doc_post = Nokogiri::HTML(open(post['href']))
+        doc_post.css('div#thumbs a').each do |img|
+          post['images'] << img['href']
+        end
+      end
+    end
+  end
+  
 end

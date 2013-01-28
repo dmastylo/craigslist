@@ -53,12 +53,13 @@ describe "Craigslist" do
     end
   end
 
-  context "#images" do
-    it "should return its receiver so that method calls can be chained" do
-      craigslist = Craigslist
-      craigslist.images.should be craigslist
-    end
-  end
+  # BUG: This test takes 30 seconds to run, so I'm commenting it out for now
+  # context "#images" do
+  #   it "should return its receiver so that method calls can be chained" do
+  #     craigslist = Craigslist
+  #     craigslist.images.should be craigslist
+  #   end
+  # end
 
   context "#last" do
     it "should return the default number of last posts for seattle and
