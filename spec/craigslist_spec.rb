@@ -53,6 +53,13 @@ describe "Craigslist" do
     end
   end
 
+  context "#images" do
+    it "should return its receiver so that method calls can be chained" do
+      craigslist = Craigslist
+      craigslist.images.should be craigslist
+    end
+  end
+
   context "#last" do
     it "should return the default number of last posts for seattle and
       for_sale" do
@@ -69,16 +76,16 @@ describe "Craigslist" do
       posts.length.should eq max_results
     end
 
-    # it "should be able to handle a request for over 100 results" do
-    #   max_results = 150
-    #   posts = Craigslist.new_york.for_sale.bikes.last(max_results)
-    #   posts.should be_a Array
-    #   posts.length.should eq max_results
-    # end
+    it "should be able to handle a request for over 100 results" do
+      max_results = 150
+      posts = Craigslist.new_york.bikes.last(max_results)
+      posts.should be_a Array
+      posts.length.should eq max_results
+    end
 
     it "should have content in each result" do
       max_results = 10
-      posts = Craigslist.new_york.for_sale.bikes.last(max_results)
+      posts = Craigslist.new_york.bikes.last(max_results)
       posts.each do |post|
         post['text'].should_not be nil
         post['href'].should_not be nil
@@ -87,7 +94,7 @@ describe "Craigslist" do
 
     it "should have image urls if has_image is true" do
       max_results = 10
-      posts = Craigslist.new_york.for_sale.bikes.last(max_results)
+      posts = Craigslist.new_york.bikes.images.last(max_results)
       posts.each do |post|
         post['images'].should_not be nil if post['has_image']
       end

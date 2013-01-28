@@ -37,7 +37,11 @@ Craigslist.for_sale.seattle.last
 # span multiple pages
 Craigslist.seattle.for_sale.last(40)
 
-# Return an array of supported cities.p
+# Return an array with all the URLs of each post included, assuming the post
+# has images.
+Craigslist.seattle.for_sale.images.last
+
+# Return an array of supported cities.
 Craigslist.cities
 
 # Return an array of supported categories.
