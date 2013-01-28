@@ -134,8 +134,10 @@ module Craigslist
         doc_post.css('div#thumbs a').each do |img|
           post['images'] << img['href']
         end
+      else
+        post['has_image'] = false
       end
     end
   end
-  
+
 end
