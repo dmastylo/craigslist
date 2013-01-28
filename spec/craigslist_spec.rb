@@ -39,25 +39,6 @@ describe "Craigslist" do
     end
   end
 
-  context "#build_uri" do
-    it "should return a valid uri" do
-      Craigslist.build_uri('seattle', 'jjj').should eq "http://seattle.craigslist.org/jjj/"
-    end
-  end
-
-  context "#more_results" do
-    it "should return a valid craigslisturl for more results" do
-      correct_uri = "http://seattle.craigslist.org/jjj/index400.html"
-      Craigslist.more_results('http://seattle.craigslist.org/jjj/', '4').should eq correct_uri
-    end
-
-    it "should provide a valid url that Nokogiri can open" do
-      uri = Craigslist.more_results('http://seattle.craigslist.org/jjj/', '4')
-      doc = Nokogiri::HTML(open(uri))
-      doc.xpath("//p[@class = 'row']").length.should be > 0
-    end
-  end
-
   context "a city method" do
     it "should return its receiver so that method calls can be chained" do
       craigslist = Craigslist
@@ -88,19 +69,27 @@ describe "Craigslist" do
       posts.length.should eq max_results
     end
 
-    it "should be able to handle a request for over 100 results" do
-      max_results = 150
-      posts = Craigslist.new_york.for_sale.bikes.last(max_results)
-      posts.should be_a Array
-      posts.length.should eq max_results
-    end
+    # it "should be able to handle a request for over 100 results" do
+    #   max_results = 150
+    #   posts = Craigslist.new_york.for_sale.bikes.last(max_results)
+    #   posts.should be_a Array
+    #   posts.length.should eq max_results
+    # end
 
     it "should have content in each result" do
-      max_results = 20
+      max_results = 10
       posts = Craigslist.new_york.for_sale.bikes.last(max_results)
       posts.each do |post|
         post['text'].should_not be nil
         post['href'].should_not be nil
+      end
+    end
+
+    it "should have image urls if has_image is true" do
+      max_results = 10
+      posts = Craigslist.new_york.for_sale.bikes.last(max_results)
+      posts.each do |post|
+        post['images'].should_not be nil if post['has_image']
       end
     end
   end
